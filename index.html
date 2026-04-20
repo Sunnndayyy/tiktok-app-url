@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goin' bush for IOS</title>
+    <title>Goin' Bush</title>
     <style>
         * {
             margin: 0;
@@ -45,6 +45,12 @@
             font-size: 28px;
             font-weight: 600;
             color: black;
+        }
+
+        .subtitle {
+            margin-top: 12px;
+            font-size: 17px;
+            color: #555;
         }
 
         .popup {
@@ -115,6 +121,14 @@
             font-weight: bold;
         }
 
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+            align-items: center;
+        }
+
         .download-button {
             display: inline-block;
             background: rgb(0,122,255);
@@ -135,13 +149,105 @@
             box-shadow: 0 6px 20px rgba(0,122,255,0.4);
         }
 
+        .download-button.secondary {
+            background: white;
+            color: rgb(0,122,255);
+            border: 2px solid rgba(0,122,255,0.2);
+            box-shadow: none;
+        }
+
+        .download-button.secondary:hover {
+            background: rgba(0,122,255,0.05);
+            box-shadow: none;
+        }
+
+        .status {
+            margin-top: 18px;
+            font-size: 15px;
+            color: #666;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 32px 20px 140px;
+            }
+
+            .popup {
+                top: auto;
+                right: 16px;
+                bottom: 16px;
+                left: 16px;
+                width: auto;
+                max-width: none;
+                padding: 22px;
+                font-size: 16px;
+            }
+
+            .popup::after {
+                display: none;
+            }
+
+            .download-button {
+                width: 100%;
+                max-width: 320px;
+            }
+        }
+
     </style>
     <script>
-        // Automatic redirect to App Store after page loads
+        const APP_STORE_URL = 'https://apps.apple.com/au/app/goin-bush/id6745422236';
+        const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.joshyardy.goinbush&hl=en';
+
+        function isAndroidDevice() {
+            return /Android/i.test(navigator.userAgent);
+        }
+
+        function isIOSDevice() {
+            const userAgent = navigator.userAgent;
+            const isIPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+
+            return /iPhone|iPad|iPod/i.test(userAgent) || isIPadOS;
+        }
+
+        function getTargetStore() {
+            if (isAndroidDevice()) {
+                return {
+                    name: 'Google Play',
+                    url: PLAY_STORE_URL
+                };
+            }
+
+            if (isIOSDevice()) {
+                return {
+                    name: 'the App Store',
+                    url: APP_STORE_URL
+                };
+            }
+
+            return null;
+        }
+
         window.addEventListener('load', function() {
+            const appStoreButton = document.getElementById('app-store-button');
+            const playStoreButton = document.getElementById('play-store-button');
+            const statusMessage = document.getElementById('status-message');
+            const title = document.getElementById('store-title');
+            const targetStore = getTargetStore();
+
+            appStoreButton.href = APP_STORE_URL;
+            playStoreButton.href = PLAY_STORE_URL;
+
+            if (!targetStore) {
+                statusMessage.textContent = 'Choose your store below.';
+                return;
+            }
+
+            title.textContent = "You're being redirected to " + targetStore.name;
+            statusMessage.textContent = 'If nothing happens, use the button below.';
+
             setTimeout(function() {
-                window.location.href = 'https://apps.apple.com/au/app/goin-bush/id6745422236';
-            }, 1000); // 1 second delay to show the page briefly
+                window.location.href = targetStore.url;
+            }, 1000);
         });
     </script>
 </head>
@@ -149,8 +255,13 @@
     
     <div class="container">
         <div class="app-icon"></div>
-        <div class="title">Search "Goin' Bush" on the App Store</div>
-        <a href="https://apps.apple.com/au/app/goin-bush/id6745422236" class="download-button">Download App</a>
+        <div class="title" id="store-title">Get Goin' Bush on your device</div>
+        <div class="subtitle">We’ll send you to the right app store when we can detect your device.</div>
+        <div class="button-group">
+            <a href="https://apps.apple.com/au/app/goin-bush/id6745422236" id="app-store-button" class="download-button">Download on the App Store</a>
+            <a href="https://play.google.com/store/apps/details?id=com.joshyardy.goinbush&hl=en" id="play-store-button" class="download-button secondary">Get it on Google Play</a>
+        </div>
+        <div class="status" id="status-message">Checking your device…</div>
     </div>
 
     <div class="popup">
